@@ -1,0 +1,160 @@
+---
+
+- name: Install PHP
+  apt: pkg={{ item }} state=present
+  with_items:
+    - php5-fpm
+    - php5-common
+    - php5-mcrypt
+    - php5-mysql
+    - libapache2-mod-php5
+    - php5-cli
+    - php5-curl
+    - php5-imagick
+    - php5-gd
+    - php5-tidy
+
+#Vagrant only config
+- name: Install PHP dev packages for Vagrant
+  apt: pkg={{ item }} state=present
+  with_items:
+    - php5-dev
+    - php5-xdebug
+  when: env == "development"
+
+- name: Stop Apache
+  service: name=apache2 state=stopped enabled=no
+
+- name: Remove Apache
+  apt: pkg={{ item }} state=absent
+  with_items:
+      - apache2
+
+- name: Install Nginx
+  apt: pkg=nginx state=latest
+
+- name: install hhvm gpg key
+  shell: apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0x5a16e7281be7a449
+
+- name: Add HHVM repo
+  shell: echo 'deb http://dl.hhvm.com/debian wheezy main' | sudo tee /etc/apt/sources.list.d/hhvm.list
+
+- name: Update apt
+  apt: update_cache=yes
+
+- name: install hhvm packages
+  apt: pkg={{ item }} state=latest update_cache=yes force=yes
+  with_items:
+      - hhvm
+      #- ps-watcher
+
+
+############################Adding syslink to Vagrant config files
+#Vagrant only config
+- name: Backup default webserver configs on Vagrant
+  shell: mv {{ item.dest }} {{ item.dest }}.bak.{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}
+  with_items: webserver_config_files
+  when: env == "development"
+
+#Vagrant only config
+- name: Set syslinks to Config files on Vagrant
+  file: src="{{ dev_webserver_config_path }}/{{ item.src }}"
+        dest={{ item.dest }}
+        state=link
+  with_items: webserver_config_files
+  when: env == "development"
+
+#Vagrant only config
+- name: Remove Xdebug Config files on Vagrant
+  file: path={{ item.dest }}
+        state=absent
+  with_items: xdebug_files
+  when: env == "development"
+
+#Vagrant only config
+- name: Set syslinks to Xdebug Config files on Vagrant
+  file: src={{ item.dev_src }}
+        dest={{ item.dest }}
+        state=link
+  with_items: xdebug_files
+  when: env == "development"
+####################################
+
+
+############################Coping config files to staging
+#Staging only config
+- name: Coping config files to Staging
+  copy: src={{ item.src }}
+        dest={{ item.dest }}
+        backup=yes
+  with_items: webserver_config_files
+  when: env == "staging"
+####################################
+
+
+#- name: Set error log permissions
+#  file: path=/var/log/nginx state=touch mode=755
+#
+- name: Set log permissions
+  file: path=/var/log/php5 state=directory owner=www-data group=www-data recurse=yes
+
+#- name: Set logrotator for HHVM
+#  copy: src=hhvm dest=/etc/logrotate.d/hhvm backup=yes
+
+- name: Set PHP dir permissions
+  file: path=/var/lib/php5 state=directory owner=www-data group=www-data  recurse=yes
+
+- name: Set session permissions
+  file: path=/var/lib/php5/session state=directory owner=www-data group=www-data mode=0755  recurse=yes
+
+- name: Set /run/hhvm  permissions
+  file: path=/var/run/hhvm state=directory owner=www-data group=www-data  recurse=yes
+
+- name: Set /run/user/hhvm  permissions
+  file: path=/run/user/hhvm state=directory owner=www-data group=www-data  recurse=yes
+  notify:
+      - restart HHVM
+      - restart php5-fpm
+      - restart Nginx
+
+
+
+############################Adding Vagrant tools
+#Vagrant only config
+- name: Download phpMyAdmin
+  get_url: url=http://downloads.sourceforge.net/project/phpmyadmin/phpMyAdmin/4.3.6/phpMyAdmin-4.3.6-english.tar.gz
+           dest=/tmp/phpMyAdmin-4.3.6-english.tar.gz
+  when: env == "development"
+
+- name: Unpack phpMyAdmin
+  shell: mkdir /var/www/phpMyAdmin && sudo tar xfz /tmp/phpMyAdmin-4.3.6-english.tar.gz  --strip-components=1 -C /var/www/phpMyAdmin
+  when: env == "development"
+
+- name: Set permissions for phpMyAdmin folder
+  file: path=/var/www/phpMyAdmin owner=root group=root
+  when: env == "development"
+
+- name: Configure phpMyAdmin
+  copy: src=development/config.inc.php
+        dest=/var/www/phpMyAdmin/config.inc.php
+        backup=yes
+  when: env == "development"
+
+- name: Add NodeJS repo
+  shell: curl -sL https://deb.nodesource.com/setup | sudo  bash -
+  when: env == "development"
+
+- name: Install NodeJS
+  apt: pkg={{ item }} state=latest update_cache=yes
+  with_items:
+    - nodejs
+    - build-essential
+    - ruby-full
+    - rubygems
+  when: env == "development"
+
+- name: Installing nodeJS global packages
+  shell: npm install -g gulp
+  when: env == "development"
+####################################
+

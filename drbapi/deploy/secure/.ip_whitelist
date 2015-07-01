@@ -1,0 +1,22 @@
+allow 127.0.0.1;
+
+# Kantoor DWS Almere
+allow 90.145.153.10;
+
+# Kantoor LP Sant Cugat
+allow 83.45.193.45;
+allow 88.0.25.203;
+
+# Kantoor Floris
+allow 212.153.88.9;
+allow 94.214.125.97;
+
+# Stefan Thuis
+allow 80.57.197.70;
+allow 86.81.130.37;
+
+# VPN Leander
+allow 213.201.147.58;
+
+# Wouter thuis
+allow 213.46.87.171;

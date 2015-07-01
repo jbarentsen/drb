@@ -1,0 +1,57 @@
+---
+
+- name: Install Redis
+  apt: pkg=redis-server state=latest
+
+- name: Start Redis
+  service: name=redis-server state=started enabled=yes
+
+- name: Install MariaDB dependencies
+  apt: pkg={{ item }} state=present  update_cache=yes
+  with_items:
+    - python-software-properties
+    - python-mysqldb
+
+#@todo upgrade to MariaDB 10
+- name: add MariaDB keys
+  shell: apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0xcbcb082a1bb943db
+
+- name: add MariaDB repository
+  apt_repository: repo='deb http://ams2.mirrors.digitalocean.com/mariadb/repo/5.5/debian wheezy main'  state=present  update_cache=yes
+
+- name: Configure MariaDB Priority
+  copy: src=mariadb
+        dest=/etc/apt/preferences.d/mariadb
+
+- name: install MariaDB packages
+  apt: pkg={{ item }} state=latest update_cache=yes
+  with_items:
+      - mariadb-server
+
+- name: Configure MariaDB
+  copy: src=my.cnf
+        dest=/etc/mysql/my.cnf
+        backup=yes
+
+  #- name: Copy debian.cnf
+  #  template: src=debian.cnf.j2 dest=/etc/mysql/debian.cnf
+
+- name: Start MariaDB
+  service: name=mysql state=started enabled=yes
+
+- name: Create a new database
+  mysql_db: name=ta_ncp state=present collation=utf8_general_ci
+
+- name: Create a database user
+  mysql_user: name=dws password=dws priv=*.*:ALL host=localhost state=present
+
+- name: Beanstalkd | Install package
+  apt: name=beanstalkd  state=latest  update_cache=yes
+
+- name: Beanstalkd | Start service
+  service: name=beanstalkd state=started enabled=yes
+
+- name: Configure Beanstalkd
+  copy: src=beanstalkd
+        dest=/etc/default/beanstalkd
+        backup=yes

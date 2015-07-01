@@ -1,0 +1,63 @@
+<!--
+See http://developer.yahoo.com/ypatterns/pattern.php?pattern=itempagination
+See http://developer.yahoo.com/ypatterns/pattern.php?pattern=searchpagination
+-->
+
+<?php
+$params = $this->routeParams;
+?>
+
+<?php if ($this->pageCount):
+    ?>
+
+    <ul class="pagination">
+        <li>
+            <span>
+                <?php echo $this->firstItemNumber; ?> - <?php echo $this->lastItemNumber; ?>
+                of <?php echo $this->totalItemCount; ?>
+            </span>
+        </li>
+        <li>
+            <?php if (isset($this->previous)): ?>
+                <a href="<?php
+                $params['page'] = $this->previous;
+                echo $this->url($this->route, $params);
+                ?>">
+                    <?php echo $this->translate('Prev'); ?>
+                </a>
+            <?php else: ?>
+                <span class="disabled"><?php echo $this->translate('Prev'); ?></span>
+            <?php endif; ?>
+        </li>
+        <!-- Numbered page links -->
+        <?php foreach ($this->pagesInRange as $page): ?>
+            <li>
+                <?php if ($page != $this->current): ?>
+                    <a href="<?php
+                    $params['page'] = $page;
+                    echo $this->url($this->route, $params);
+                    ?>">
+                           <?php echo $page; ?>
+                    </a>
+                <?php else: ?>
+                    <span><?php echo $page; ?></span>
+                <?php endif; ?>
+            </li>
+        <?php endforeach; ?>
+        <li>
+            <!-- Next page link -->
+            <?php if (isset($this->next)): ?>
+                <a href="<?php
+                $params['page'] = $this->next;
+                echo $this->url($this->route, $params);
+                ?>">
+                    <?php echo $this->translate('Next'); ?>
+                </a>
+            <?php else: ?>
+                <span class="disabled"><?php echo $this->translate('Next'); ?></span>
+            <?php endif; ?>
+        </li>
+    </ul>
+    <?php
+
+endif;

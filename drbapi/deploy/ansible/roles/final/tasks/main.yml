@@ -1,0 +1,35 @@
+---
+
+- name: Update locate DB
+  shell: apt-get update && updatedb
+
+- name: Configure crontab
+  copy: src={{env }}/crontab
+        dest=/etc/cron.d/crontab
+
+############################Adding repos to Vagrant
+- name: Install composer
+  shell: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin
+  when: env == "development"
+
+- name: Rename composer.phar
+  shell: mv  /usr/bin/composer.phar /usr/bin/composer
+  when: env == "development"
+
+- name: Runing composer
+  sudo_user: vagrant
+  shell: cd /var/www/leagues.datawiresport.com && composer update  --prefer-dist
+  ignore_errors: yes
+  when: env == "development"
+
+- name: Updating DB with Doctrine
+  shell: cd /var/www/leagues.datawiresport.com && php public/index.php orm:schema-tool:update --force
+  ignore_errors: yes
+  when: env == "development"
+
+- name: Runing npm
+  sudo_user: vagrant
+  shell: cd /var/www/leagues.datawiresport.com/frontend && npm install && gulp --production
+  ignore_errors: yes
+  when: env == "development"
+####################################

@@ -1,0 +1,15 @@
+---
+# deploy production and staging machines for live use
+
+- hosts: all
+  gather_facts: false
+  sudo: yes
+  roles:
+    - common
+    - webserver
+    - db-server
+    - final
+  vars_files:
+      - "group_vars/webserver.yml"
+  handlers:
+    - include: handlers/handlers.yml

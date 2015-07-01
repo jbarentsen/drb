@@ -1,0 +1,17 @@
+---
+# webserver
+
+dev_webserver_config_path: "{{ base_path }}/deploy/ansible/roles/webserver/files"
+webserver_config_path: "{{ env }}/config"
+webserver_config_files:
+        - { dest: /etc/init.d/hhvm , src: "{{ webserver_config_path }}/hhvm/hhvm" }
+        - { dest: /etc/hhvm/server.ini , src: "{{ webserver_config_path }}/hhvm/server.ini" }
+        - { dest: /etc/hhvm/php.ini , src:  "{{ webserver_config_path }}/hhvm/php.ini" }
+        - { dest: /etc/nginx/nginx.conf , src: "{{ webserver_config_path }}/nginx/nginx.conf" }
+        - { dest: /etc/nginx/fastcgi_params , src:  "{{ webserver_config_path }}/nginx/fastcgi_params" }
+        - { dest: /etc/php5/cli/php.ini , src: "{{ webserver_config_path }}/php5/cli/php.ini" }
+        - { dest: /etc/php5/fpm/php.ini , src: "{{ webserver_config_path }}/php5/fpm/php.ini" }
+        - { dest: /etc/php5/fpm/php-fpm.conf , src: "{{ webserver_config_path }}/php5/fpm/php-fpm.conf" }
+
+xdebug_files:
+    - { dest: /etc/php5/fpm/conf.d/20-xdebug.ini , dev_src: "{{ dev_webserver_config_path }}/{{ webserver_config_path }}/php5/20-xdebug.ini" }

@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * Kapitchi Zend Framework 2 Modules (http://kapitchi.com/)
+ *
+ * @copyright Copyright (c) 2012-2013 Kapitchi Open Source Team (http://kapitchi.com/open-source-team)
+ * @license   http://opensource.org/licenses/LGPL-3.0 LGPL 3.0
+ */
+use Zend\Mvc\Controller\Plugin\FlashMessenger;
+
+$messenger = $this->flashMessenger()->getPluginFlashMessenger();
+foreach (array(
+FlashMessenger::NAMESPACE_ERROR,
+ FlashMessenger::NAMESPACE_SUCCESS,
+ FlashMessenger::NAMESPACE_INFO,
+ FlashMessenger::NAMESPACE_DEFAULT)
+as $namespace):
+
+    $messenger->setNamespace($namespace);
+    $userMsgs = array_merge($messenger->getCurrentMessages(), $messenger->getMessages());
+    $messenger->clearCurrentMessages();
+
+    foreach ($userMsgs as $msg):
+        $msgText = $msg;
+        if (is_array($msg)) {
+            $msgText = $msg['message'];
+        }
+        ?>
+        <div class="alert alert-<?php echo $namespace; ?>">
+            <?php echo $msgText; ?>
+        </div>
+    <?php endforeach; ?> 
+<?php
+endforeach;
+

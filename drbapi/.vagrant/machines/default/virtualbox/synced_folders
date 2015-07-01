@@ -1,0 +1,1 @@
+{"nfs":{"/var/www/dev.drbapi.de":{"nfs":{"group":"www-data","owner":"www-data"},"mount_options":["nolock,vers=3,udp,noatime"],"guestpath":"/var/www/dev.drbapi.de","hostpath":"/Users/janb/Development/JBIT/drbapi","disabled":false,"type":"nfs","map_uid":501,"map_gid":20,"nfs_udp":true,"nfs_version":3,"uuid":"1238752525"}}}

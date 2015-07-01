@@ -1,0 +1,13 @@
+---
+# configuration for vagrant
+
+vm: 1
+env: development
+users:
+    - vagrant
+    - root
+hostname: leagues.datawiresport.dev
+common_libs:
+    - libsqlite3-dev
+    - ruby1.9.1-dev
+    - siege

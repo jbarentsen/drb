@@ -1,0 +1,17 @@
+---
+# standard handlers to share globally
+
+
+- name: apt update
+  apt: update_cache=yes
+
+- name: restart php5-fpm
+  service: name=php5-fpm state=restarted enabled=yes
+
+- name: restart HHVM
+  service: name=hhvm state=restarted enabled=yes
+
+- name: restart Nginx
+  service: name=nginx state=restarted enabled=yes
+
+

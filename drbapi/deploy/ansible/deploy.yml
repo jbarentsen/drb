@@ -1,0 +1,10 @@
+---
+# deploy code
+
+- hosts: all
+  gather_facts: false
+  sudo: yes
+  roles:
+    - deploy
+  handlers:
+    - include: handlers/handlers.yml

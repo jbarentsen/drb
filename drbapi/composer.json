@@ -1,0 +1,45 @@
+{
+  "name": "dws/ta-ncp",
+  "description": "Tennis Australia's National Competition Planner",
+  "license": "proprietary",
+  "version": "0.0.1-dev",
+  "type": "project",
+  "homepage": "http://www.tennis.com.au/",
+  "require": {
+    "php": ">=5.4",
+    "zendframework/zendframework": "2.*",
+    "zf-commons/zfc-user": "1.*",
+    "zf-commons/zfc-user-doctrine-orm": "dev-master",
+    "fillup/zfauthsaml": "dev-master",
+    "doctrine/doctrine-module": "0.*",
+    "doctrine/doctrine-orm-module": "0.*",
+    "gedmo/doctrine-extensions": "dev-master",
+    "graylog2/gelf-php": "dev-master",
+    "robmorgan/phinx": "dev-master",
+    "slm/queue": "0.4.*",
+    "slm/queue-beanstalkd": "dev-master",
+    "zfcampus/zf-apigility": "~1.0",
+    "zfcampus/zf-oauth2-doctrine": "dev-master",
+    "vgarvardt/zf-simple-migrations": "dev-master"
+  },
+  "require-dev": {
+    "zendframework/zend-developer-tools": "dev-master",
+    "squizlabs/php_codesniffer": "dev-master",
+    "facebook/xhprof": "dev-master",
+    "phpunit/phpunit": "dev-master",
+    "mockery/mockery": "dev-master",
+    "zfcampus/zf-apigility-admin": "~1.0",
+    "zfcampus/zf-development-mode": "~2.0"
+  },
+  "autoload": {
+    "psr-0": {
+      "Dws\\": "library/dws"
+    },
+    "config": {
+      "preferred-install": "dist",
+      "github-oauth": {
+        "github.com.removethis": "315ea8329798ea4bbe47439d1e578a1336772c15(not valid anymore. Replace with DatawireSport Github token)"
+      }
+    }
+  }
+}

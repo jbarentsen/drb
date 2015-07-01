@@ -1,0 +1,12 @@
+/var/log/hhvm/*.log {
+	rotate 12
+	weekly
+	missingok
+	notifempty
+	compress
+	delaycompress
+	create 666 www-data www-data
+	postrotate
+		invoke-rc.d hhvm reopen-logs > /dev/null
+	endscript
+}

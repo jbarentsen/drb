@@ -1,0 +1,132 @@
+---
+
+- name: Disable interactive
+  shell: export DEBIAN_FRONTEND=noninteractive
+
+- name: update apt-cache if needed
+  apt: update_cache=yes
+
+- name: install common packages
+  apt: pkg={{ item }} state=latest update_cache=yes
+  with_items:
+    - vim
+    - git-core
+    - curl
+    - wget
+    - build-essential
+    - software-properties-common
+    - mailutils
+
+- name: install evnironment specific packages
+  apt: pkg={{ item }} state=latest update_cache=yes
+  with_items: common_libs
+
+- name: Configuring locale to server
+  copy: src=locale
+        dest=/etc/default/locale
+        backup=yes
+
+- name: Configuring locale for bash
+  shell: export LC_ALL=en_US.UTF-8 && export LC_CTYPE=en_US.UTF-8
+
+- name: add Fish keys
+  shell: apt-key adv --keyserver keyserver.ubuntu.com --recv-key D880C8E4
+
+- name: add Fish repository
+  apt_repository: repo='deb http://download.opensuse.org/repositories/shells:/fish:/release:/2/Debian_7.0/ ./'  state=present  update_cache=yes
+
+- name: install Fish packages
+  apt: pkg=fish state=latest update_cache=yes
+
+- name: Add fishshell as default shell
+  user: name={{ item }} shell=/usr/bin/fish
+  with_items: users
+
+- name: Add APP_ENV to bash
+  lineinfile: dest=/etc/bash.bashrc insertafter=EOF line='export APP_env == "{{ env }}' state=present
+
+- name: Add APP_ENV to fish
+  lineinfile: dest=/usr/share/fish/config.fish insertafter=EOF line='set -g -x APP_ENV {{ env }}' state=present
+
+- name: Remove sendmail
+  apt: pkg=sendmail state=absent update_cache=no
+
+- name: set hostname
+  hostname: name={{hostname}}
+
+- name: Configure hosts file
+  copy: src={{ env }}/hosts
+        dest=/etc/hosts
+        backup=yes
+
+#@todo use bitbucket
+#- name: get github.com public key
+#  command: /usr/bin/ssh-keyscan github.com
+#  register: github_keyscan
+#
+#- name: github key is recognized
+#  lineinfile: dest=/etc/ssh/ssh_known_hosts
+#              create=yes
+#              regexp='^github.com'
+#              line="{{ github_keyscan.stdout }}"
+#
+#- name: keep ssh agent forwarding under sudo
+#  lineinfile: dest=/etc/sudoers
+#              insertafter='^Defaults'
+#              line='Defaults env_keep += "SSH_AUTH_SOCK"'
+#              state=present
+#              validate='visudo -cf %s'
+
+
+############################MailCatcher
+#Vagrant only config
+- name: Install mailcatcher
+  shell: gem install mailcatcher
+  when: env == "development"
+
+#Vagrant only config
+- name: Configuring mailcatcher
+  copy: src={{ env }}/mailcatcher
+        dest=/etc/init.d/mailcatcher
+        mode=755
+  when: env == "development"
+
+#Vagrant only config
+#- name: Configuring mailcatcher
+#  copy: src={{ env }}/mailcatcher.conf
+#        dest=/etc/init/mailcatcher.conf
+#        backup=yes
+
+#Vagrant only config
+- name: Start mailcatcher
+  service: name=mailcatcher state=restarted enabled=yes
+  when: env == "development"
+####################################
+
+
+- name: Install Postfix
+  apt: pkg=postfix state=latest update_cache=yes
+
+- name: Configuring Postfix
+  copy: src={{ env }}/main.cf
+        dest=/etc/postfix/main.cf
+        mode=0644
+
+############################MailTrap.io
+#staging only config
+- name: Add mailtrap.io hash
+  copy: src={{ env }}/sasl_passwd
+        dest=/etc/postfix/sasl_passwd
+        mode=0644
+  when: env == "staging"
+
+#staging only config
+- name: Applying mailtrap hash
+  shell: postmap /etc/postfix/sasl_passwd
+  when: env == "staging"
+####################################
+
+
+- name: Start postfix
+  service: name=postfix state=restarted enabled=yes
+

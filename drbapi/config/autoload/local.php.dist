@@ -1,0 +1,16 @@
+<?php
+//@todo delete this?
+return [
+    'zenddevelopertools' => [
+        'toolbar' => [
+            'entries' => [
+                'profiler' => 'profiler-toolbar/xhprof',
+            ],
+        ],
+        'profiler' => [
+            'collectors' => [
+                'profiler' => 'Dws\Xhprof\Collector',
+            ],
+        ],
+    ],
+];
